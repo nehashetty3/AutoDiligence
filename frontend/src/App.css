@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-2: #F5F4F0;
+  --border: #E8E6E0;
+  --border-strong: #D0CEC8;
+  --text-1: #1A1916;
+  --text-2: #5C5A55;
+  --text-3: #9C9A95;
+  --accent: #0A2540;
+  --accent-2: #1D4ED8;
+  --green: #15803D;
+  --green-bg: #F0FDF4;
+  --red: #B91C1C;
+  --red-bg: #FEF2F2;
+  --amber: #B45309;
+  --amber-bg: #FFFBEB;
+  --nav-h: 56px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+a { text-decoration: none; color: inherit; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
