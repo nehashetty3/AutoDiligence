@@ -1,23 +1,36 @@
 #!/bin/bash
-echo "Starting AutoDiligence..."
+set -e
+
+MODE="${1:-dev}"
+
+if [ "$MODE" = "docker" ]; then
+    echo "Starting AutoDiligence with Docker Compose..."
+    docker compose up --build -d
+    echo ""
+    echo "AutoDiligence is running at: http://localhost"
+    echo "API health check: http://localhost/health"
+    exit 0
+fi
+
+echo "Starting AutoDiligence in local development mode..."
 source venv/bin/activate
 brew services start postgresql@15 2>/dev/null || true
 
-# Start backend in background
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 echo "Backend started (PID: $BACKEND_PID)"
 sleep 3
 
-# Start frontend
-cd frontend && npm start &
+cd frontend
+npm start &
 FRONTEND_PID=$!
+cd ..
 echo "Frontend started (PID: $FRONTEND_PID)"
 
 echo ""
-echo "AutoDiligence running at: http://localhost:3000"
-echo "API running at: http://localhost:8000"
+echo "Frontend: http://localhost:3000"
+echo "Backend:  http://localhost:8000"
 echo ""
-echo "Press Ctrl+C to stop"
+echo "Use './start.sh docker' for the production-style Docker stack."
 
 wait

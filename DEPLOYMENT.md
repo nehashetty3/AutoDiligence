@@ -1,70 +1,137 @@
 # Deployment Guide — AWS EC2
 
-## Step 1 — Launch EC2 Instance
-1. Go to AWS Console → EC2 → Launch Instance
-2. Choose: Ubuntu 22.04 LTS
-3. Instance type: t3.medium (minimum) or t3.large (recommended)
-4. Storage: 30GB minimum
-5. Security Group: Open ports 22 (SSH), 80 (HTTP), 443 (HTTPS), 8000 (API), 3000 (Frontend)
-6. Download your .pem key file
+AutoDiligence is easiest to deploy on AWS EC2 with Docker Compose. The frontend is served by Nginx inside the frontend container, and API traffic is proxied to the FastAPI backend container.
 
-## Step 2 — Connect to Instance
+## Architecture
+
+- `frontend` serves the React build on port `80`
+- `backend` serves FastAPI on port `8000`
+- `db` runs PostgreSQL 15
+
+Only port `80` needs to be public for a basic deployment.
+
+## 1. Launch an EC2 Instance
+
+Recommended baseline:
+
+- AMI: `Ubuntu 22.04 LTS`
+- Instance type: `t3.large` recommended, `t3.medium` minimum
+- Storage: `30 GB` or more
+
+Security group:
+
+- `22` for SSH from your IP
+- `80` for HTTP
+- `443` for HTTPS if you later add TLS
+
+## 2. Connect to the Instance
+
 ```bash
 chmod 400 your-key.pem
-ssh -i your-key.pem ubuntu@your-ec2-ip
+ssh -i your-key.pem ubuntu@your-ec2-public-ip
 ```
 
-## Step 3 — Install Dependencies on EC2
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y python3.11 python3.11-venv python3-pip postgresql postgresql-contrib nodejs npm git
+## 3. Install Docker and Git
 
-sudo systemctl start postgresql
-sudo -u postgres createdb ma_diligence
-```
-
-## Step 4 — Deploy Application
 ```bash
-git clone https://github.com/yourusername/autodiligence.git
-cd autodiligence
-cp .env.template .env
-nano .env  # Add your API keys
-./setup.sh
-```
-
-## Step 5 — Run with Docker (Recommended)
-```bash
-sudo apt install -y docker.io docker-compose
+sudo apt update
+sudo apt install -y docker.io docker-compose-v2 git
+sudo systemctl enable docker
 sudo systemctl start docker
-sudo docker-compose up -d
+sudo usermod -aG docker $USER
+newgrp docker
 ```
 
-## Step 6 — Setup Nginx Reverse Proxy
-```bash
-sudo apt install nginx -y
-sudo nano /etc/nginx/sites-available/autodiligence
-```
-
-Paste:
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    location / { proxy_pass http://localhost:3000; }
-    location /api { proxy_pass http://localhost:8000; }
-}
-```
+## 4. Clone the Repository
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/autodiligence /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl restart nginx
+git clone https://github.com/nehashetty3/AutoDiligence.git
+cd AutoDiligence
 ```
 
-## Step 7 — SSL Certificate (Free)
+## 5. Configure Environment Variables
+
 ```bash
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d your-domain.com
+cp .env.example .env
+nano .env
 ```
 
-## Your live URL
-https://your-domain.com
+Minimum values to review in `.env`:
+
+- `GROQ_API_KEY`
+- `NEWS_API_KEY`
+- `PINECONE_API_KEY`
+- `OPENAI_API_KEY=skip`
+- `DATABASE_URL=postgresql://postgres:postgres@db:5432/ma_diligence`
+- `FRONTEND_URL=http://your-ec2-public-ip`
+
+If you plan to use watchlist email alerts, also set:
+
+- `ALERT_EMAIL_SENDER`
+- `ALERT_EMAIL_PASSWORD`
+- `ALERT_EMAIL_RECIPIENT`
+
+## 6. Build and Start the Stack
+
+```bash
+docker compose up --build -d
+```
+
+Check status:
+
+```bash
+docker compose ps
+docker compose logs backend --tail=100
+```
+
+The app should be available at:
+
+- `http://your-ec2-public-ip`
+
+Health check:
+
+- `http://your-ec2-public-ip/health`
+
+## 7. Updating the Deployment
+
+```bash
+git pull origin master
+docker compose up --build -d
+```
+
+## 8. Optional: Domain and HTTPS
+
+If you attach a domain later, point it to the EC2 public IP and place Nginx or Caddy on the host for TLS termination, or attach an AWS load balancer with ACM certificates.
+
+## Troubleshooting
+
+View running containers:
+
+```bash
+docker compose ps
+```
+
+Backend logs:
+
+```bash
+docker compose logs backend --tail=200
+```
+
+Frontend logs:
+
+```bash
+docker compose logs frontend --tail=200
+```
+
+Database logs:
+
+```bash
+docker compose logs db --tail=200
+```
+
+Restart everything:
+
+```bash
+docker compose down
+docker compose up --build -d
+```
