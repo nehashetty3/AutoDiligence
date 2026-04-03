@@ -2,6 +2,8 @@
 
 AutoDiligence is an AI-powered M&A due diligence platform that ingests public company data, evaluates cross-functional risk signals, benchmarks targets against competitors, and produces consultant-style diligence outputs in minutes.
 
+https://autodiligence.netlify.app
+
 ## Core Capabilities
 - Financial anomaly detection from SEC, Yahoo Finance, and exchange-specific fallbacks
 - News sentiment scoring and trend analysis
@@ -253,24 +255,4 @@ Important:
 
 The included [netlify.toml](/Users/neha/autodiligence/netlify.toml) and [frontend/netlify.toml](/Users/neha/autodiligence/frontend/netlify.toml) handle the frontend build and SPA routing.
 
-## Production Notes
-- `requirements.txt` includes `yfinance`, which is required by the financial ingestion pipeline
-- the backend is expected to run with Python `3.11`
-- for public EC2 deployment, expect internet scanners to hit random paths; `404` responses for those are normal
-- if you use the split deployment, make sure the backend process is supervised so it survives SSH disconnects and server reboots
 
-## Troubleshooting
-- `No module named 'yfinance'`
-  - make sure dependencies were installed from the latest [requirements.txt](/Users/neha/autodiligence/requirements.txt)
-- Netlify frontend loads but cannot analyze companies
-  - verify `REACT_APP_API_BASE_URL` points to the secure backend host
-  - trigger `Clear cache and deploy site`
-- HTTPS backend returns certificate or timeout errors
-  - make sure EC2 security group allows ports `80` and `443`
-  - verify your reverse proxy can reach FastAPI on `127.0.0.1:8000`
-
-## Project Status
-- local development supported
-- full Docker deployment supported
-- split Netlify + EC2 deployment supported
-- secure HTTPS backend routing supported through Caddy
