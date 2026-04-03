@@ -64,3 +64,31 @@ docker compose up --build -d
 Frontend is served on port `80`. The backend stays internal to Docker and is reached through the frontend reverse proxy.
 
 For the full EC2 flow, see [DEPLOYMENT.md](/Users/neha/autodiligence/DEPLOYMENT.md).
+
+## Netlify + EC2 Deployment
+
+If you want a cheaper split deployment:
+
+- deploy the frontend from `/frontend` on Netlify
+- deploy the backend and PostgreSQL on AWS EC2
+
+For Netlify:
+
+```bash
+cd frontend
+cp .env.example .env
+```
+
+Set:
+
+```bash
+REACT_APP_API_BASE_URL=http://YOUR_EC2_PUBLIC_IP:8000
+```
+
+Netlify settings:
+
+- Base directory: `frontend`
+- Build command: `npm run build`
+- Publish directory: `frontend/build`
+
+The included [frontend/netlify.toml](/Users/neha/autodiligence/frontend/netlify.toml) handles SPA routing.

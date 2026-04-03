@@ -135,3 +135,32 @@ Restart everything:
 docker compose down
 docker compose up --build -d
 ```
+
+## Alternative: Netlify Frontend + EC2 Backend
+
+If you want to reduce EC2 load and cost, you can host only the React frontend on Netlify and keep FastAPI plus PostgreSQL on EC2.
+
+### EC2 backend
+
+On EC2, run the backend and database locally or with Docker. If you use the split setup, make sure the FastAPI server is reachable on port `8000`.
+
+Security group for this setup:
+
+- `22` for SSH
+- `80` for your website if you also host anything else
+- `8000` for the API
+
+### Netlify frontend
+
+In Netlify:
+
+- connect the GitHub repo
+- set the base directory to `frontend`
+- set the build command to `npm run build`
+- set the publish directory to `build`
+
+Environment variable:
+
+- `REACT_APP_API_BASE_URL=http://YOUR_EC2_PUBLIC_IP:8000`
+
+The frontend already supports this through [frontend/src/api.js](/Users/neha/autodiligence/frontend/src/api.js), and [frontend/netlify.toml](/Users/neha/autodiligence/frontend/netlify.toml) provides the SPA redirect.

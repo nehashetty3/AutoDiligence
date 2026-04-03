@@ -1,4 +1,7 @@
 .env
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 venv/
 __pycache__/
 *.py[cod]

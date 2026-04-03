@@ -5,6 +5,7 @@ import {
   BarChart, Bar, Cell, AreaChart, Area, ComposedChart, CartesianGrid, Legend
 } from 'recharts';
 import axios from 'axios';
+import { getPDFUrl } from '../api';
 
 const rColor = s => s > 65 ? 'var(--red)' : s > 35 ? 'var(--amber)' : 'var(--green)';
 const rBg = s => s > 65 ? 'var(--red-bg)' : s > 35 ? 'var(--amber-bg)' : 'var(--green-bg)';
@@ -228,7 +229,7 @@ export default function ResultsPage({ result }) {
               <h1 style={S.compName}>{company_name}</h1>
               {ticker && <Chip color="var(--accent-2)" bg="#EFF6FF">{ticker}</Chip>}
             </div>
-            <button onClick={() => window.open(`/api/report/${company_id}/pdf`, '_blank')} style={S.exportBtn}>
+            <button onClick={() => window.open(getPDFUrl(company_id), '_blank')} style={S.exportBtn}>
               Export PDF Report
             </button>
           </div>
@@ -633,7 +634,7 @@ export default function ResultsPage({ result }) {
                   <div style={{ fontSize: 14, fontWeight: 700 }}>Due Diligence Report</div>
                   <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>AI-generated · {company_name}</div>
                 </div>
-                <button onClick={() => window.open(`/api/report/${company_id}/pdf`, '_blank')} style={S.exportBtn}>
+                <button onClick={() => window.open(getPDFUrl(company_id), '_blank')} style={S.exportBtn}>
                   Export PDF
                 </button>
               </div>

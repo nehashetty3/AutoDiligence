@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: '' });
+const rawBaseUrl = process.env.REACT_APP_API_BASE_URL || '';
+const normalizedBaseUrl = rawBaseUrl.replace(/\/+$/, '');
+
+axios.defaults.baseURL = normalizedBaseUrl;
+
+const API = axios.create({ baseURL: normalizedBaseUrl });
+
+export const buildApiUrl = (path) => {
+  if (!normalizedBaseUrl) return path;
+  return `${normalizedBaseUrl}${path}`;
+};
 
 export const analyzeCompany = (company_name) =>
   API.post('/api/analyze', { company_name });
@@ -21,6 +31,6 @@ export const getAllCompanies = () =>
   API.get('/api/companies');
 
 export const getPDFUrl = (company_id) =>
-  `/api/report/${company_id}/pdf`;
+  buildApiUrl(`/api/report/${company_id}/pdf`);
 
 export default API;
