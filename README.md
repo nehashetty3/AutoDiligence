@@ -26,6 +26,130 @@ AutoDiligence is an AI-powered M&A due diligence platform that ingests public co
 - `docker-compose.yml` - full stack container deployment
 - `DEPLOYMENT.md` - detailed infrastructure notes
 
+## Full Stack
+- Presentation layer: React frontend with analysis tabs, charts, benchmarking views, and export actions
+- API layer: FastAPI backend for company analysis, benchmarking, history, competitors, and reporting
+- Data layer: PostgreSQL for companies, risk assessments, cached outputs, and historical analysis records
+- Analytics layer: financial anomaly detection, sentiment analysis, hiring analysis, patent trend analysis, and peer benchmarking
+- ML/NLP layer: XGBoost-style risk modeling, SHAP-style interpretation, transformers, torch, and spaCy preprocessing
+- Infrastructure layer: local development, Docker Compose, AWS EC2 hosting, Netlify hosting, and Caddy HTTPS proxying
+
+## Project Motivation
+Traditional M&A due diligence is fragmented across filings, market data, news, hiring signals, and sector comparisons. AutoDiligence was built to bring those early-stage diligence checks into one workflow so a user can get a fast, structured first-pass view of company risk.
+
+The platform is designed to accelerate the initial diligence cycle, not replace full transaction work. Its main value is reducing manual context switching and turning scattered public signals into a single explainable risk narrative.
+
+## How It Works
+1. The user enters a company name or ticker.
+2. The backend resolves the company and normalizes aliases.
+3. Multiple ingestion pipelines gather financial, news, patent, hiring, and benchmark data.
+4. Analytics modules score those signals and synthesize them into a final risk profile.
+5. The frontend presents the result as an analyst-friendly diligence dashboard with tabs, comparisons, and report export.
+
+## Analysis Pipeline
+
+### 1. Company Resolution
+- maps user input to the correct legal entity or ticker
+- handles aliases, partial names, and ticker ambiguity
+- reduces wrong-company matches for common short names
+
+### 2. Financial Intelligence
+- fetches company financial and market data
+- detects anomalies across revenue, margins, leverage, cash health, and operating consistency
+- turns raw financial signals into diligence-oriented warnings
+
+### 3. News and Sentiment
+- ingests company news coverage
+- scores tone and tracks whether sentiment is improving or declining
+- incorporates sentiment as a supporting diligence signal rather than a standalone decision
+
+### 4. Innovation and Patents
+- evaluates patent activity and recent innovation momentum
+- highlights whether the company appears stable, accelerating, or stagnant on the innovation side
+
+### 5. Hiring Signals
+- estimates hiring health and hiring trend
+- uses employment momentum as a proxy for business confidence, scaling pressure, or contraction
+
+### 6. Risk Synthesis
+- combines analytics signals into a final risk score
+- classifies the company into low, medium, or high risk
+- exposes supporting factors so the score remains interpretable
+
+### 7. Competitor Benchmarking
+- compares the target against industry-relevant peers
+- shows whether the company is stronger or weaker than sector context
+- filters out obviously unrelated competitors
+
+## Key Product Screens
+- `Analyze`: search and run a new diligence workflow
+- `Overview`: consolidated score and primary diligence metrics
+- `Financials`: financial anomaly and benchmark context
+- `Sentiment & News`: tone, coverage, and trend direction
+- `Hiring`: hiring health and trend view
+- `Report`: summary-ready view for export and presentation
+- `Competitors`: peer set and industry-relative comparison
+- `Compare`: side-by-side target review
+- `Watchlist`: repeat monitoring workflow
+
+## Architecture
+
+### Frontend
+- React single-page application
+- environment-based API routing for local, split, and hosted deployments
+- tab-based UX designed for rapid diligence review
+
+### Backend
+- FastAPI service that orchestrates ingestion, analysis, persistence, and reporting
+- route layer for analysis, competitors, benchmark, history, and PDF workflows
+- analytics-first response shaping for frontend consumption
+
+### Data Storage
+- PostgreSQL stores normalized companies, assessments, and historical results
+- persistent records support repeat analysis and trend tracking over time
+
+### Hosting
+- frontend can run locally or on Netlify
+- backend can run locally, in Docker, or on EC2
+- Caddy terminates TLS for the split Netlify + EC2 deployment
+
+## Deployment Architecture
+
+### Option A: Full Stack on EC2 with Docker
+- React frontend served through Nginx
+- FastAPI backend behind the frontend service
+- PostgreSQL in Docker
+- good fit for a single-machine full-stack deployment
+
+### Option B: Netlify Frontend + EC2 Backend
+- React frontend hosted on Netlify
+- FastAPI and PostgreSQL hosted on EC2
+- Caddy provides HTTPS for the backend
+- useful when you want a lighter frontend host and more direct control over backend infrastructure
+
+### Current Working Hosted Setup
+- frontend deployed on Netlify
+- backend deployed on AWS EC2
+- backend exposed securely through Caddy and `sslip.io`
+- frontend configured with `REACT_APP_API_BASE_URL` pointing to the secure backend host
+
+## Current Limitations
+- model performance metrics are internally benchmarked and not fully validated on real historical M&A outcome datasets
+- some premium and benchmark components remain heuristic rather than calibrated on proprietary deal datasets
+- public-data coverage varies by company, geography, and exchange
+- the current hosted backend is functional but not production-hardened for scale
+- split deployment depends on backend HTTPS; browser security blocks insecure API calls from secure frontends
+
+## Future Improvements
+- validate the scoring system on real external M&A outcome datasets
+- improve acquisition premium calibration with historical comparable transactions
+- expand and refine competitor universe construction
+- move the backend to a persistent process manager or systemd service
+- add a custom domain for a cleaner public-facing deployment
+- improve observability, long-running ingestion resilience, and operational monitoring
+- broaden non-US company coverage and exchange support
+- surface clearer confidence and explanation layers for the final score
+
 ## Local Development
 
 ### Prerequisites
